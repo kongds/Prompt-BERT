@@ -20,18 +20,6 @@ from transformers.modeling_outputs import SequenceClassifierOutput, BaseModelOut
 
 import wandb
 
-def compute_kl_loss(p, q):
-
-    p_loss = F.kl_div(F.log_softmax(p, dim=-1), F.softmax(q, dim=-1), reduction='none')
-    q_loss = F.kl_div(F.log_softmax(q, dim=-1), F.softmax(p, dim=-1), reduction='none')
-
-    # You can choose whether to use function "sum" and "mean" depending on your task
-    p_loss = p_loss.sum()
-    q_loss = q_loss.sum()
-
-    loss = (p_loss + q_loss) / 2
-    return loss
-
 class MLPLayer(nn.Module):
     """
     Head for getting sentence representations over RoBERTa/BERT's CLS representation.
@@ -269,11 +257,6 @@ def cl_forward(cls,
         cos_sim = cos_sim + weights
 
     loss = loss_fct(cos_sim, labels)
-
-    if cls.model_args.add_rdrop:
-        rdrop_loss = compute_kl_loss(z1, z2)
-        print(rdrop_loss.item())
-        loss = loss + rdrop_loss
 
     # Calculate loss for MLM
     # if not cls.model_args.add_pseudo_instances and mlm_outputs is not None and mlm_labels is not None:
