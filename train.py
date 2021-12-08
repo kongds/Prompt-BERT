@@ -394,6 +394,30 @@ class OurTrainingArguments(TrainingArguments):
         metadata={"help": "Evaluate transfer task dev sets (in validation)."}
     )
 
+    # reset follow flag type Optional[bool] -> bool
+    # to fix typing error for TrainingArguments Optional[bool] in transformers==4.2.1
+    # https://github.com/huggingface/transformers/pull/10672
+    ddp_find_unused_parameters: bool = field(
+        default=None,
+        metadata={
+            "help": "When using distributed training, the value of the flag `find_unused_parameters` passed to "
+            "`DistributedDataParallel`."
+        },
+    )
+    disable_tqdm: bool = field(
+        default=None, metadata={"help": "Whether or not to disable the tqdm progress bars."}
+    )
+    remove_unused_columns: bool = field(
+        default=True, metadata={"help": "Remove columns not required by the model when using an nlp.Dataset."}
+    )
+    greater_is_better: bool = field(
+        default=None, metadata={"help": "Whether the `metric_for_best_model` should be maximized or not."}
+    )
+    load_best_model_at_end: bool = field(
+        default=False,
+        metadata={"help": "Whether or not to load the best model found during training at the end of training."},
+    )
+
     @cached_property
     @torch_required
     def _setup_devices(self) -> "torch.device":
