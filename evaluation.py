@@ -72,7 +72,7 @@ def main():
     parser.add_argument("--tokenizer_name", type=str, default='')
     parser.add_argument("--model_name_or_path", type=str,
             help="Transformers' model name or path")
-    parser.add_argument("--pooler", type=str, 
+    parser.add_argument("--pooler", type=str,
             choices=['cls', 'cls_before_pooler', 'avg',  'avg_first_last'],
             default='cls', 
             help="Which pooler to use")
@@ -80,6 +80,10 @@ def main():
             choices=['dev', 'test', 'fasttest'],
             default='test', 
             help="What evaluation mode to use (dev: fast mode, dev results; test: full mode, test results); fasttest: fast mode, test results")
+    parser.add_argument("--task_set", type=str,
+            choices=['sts', 'transfer', 'full', 'na'],
+            default='sts',
+            help="What set of tasks to evaluate on. If not 'na', this will override '--tasks'")
 
     args = parser.parse_args()
 
@@ -99,7 +103,7 @@ def main():
                     new_state_dict[key] = param
             mlp.load_state_dict(new_state_dict)
     model = AutoModel.from_pretrained(args.model_name_or_path)
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path, use_fast=True)
 
     if args.mask_embedding_sentence_autoprompt:
         state_dict = torch.load(args.model_name_or_path+'/pytorch_model.bin')
@@ -129,7 +133,15 @@ def main():
         delta, template_len = get_delta(model, args.mask_embedding_sentence_template, tokenizer, device, args)
 
     # Set up the tasks
-    args.tasks = ['STS12', 'STS13', 'STS14', 'STS15', 'STS16', 'STSBenchmark', 'SICKRelatedness']
+    #args.tasks = ['STS12', 'STS13', 'STS14', 'STS15', 'STS16', 'STSBenchmark', 'SICKRelatedness']
+    #args.tasks = ['MR']
+    if args.task_set == 'sts':
+        args.tasks = ['STS12', 'STS13', 'STS14', 'STS15', 'STS16', 'STSBenchmark', 'SICKRelatedness']
+    elif args.task_set == 'transfer':
+        args.tasks = ['MR', 'CR', 'MPQA', 'SUBJ', 'SST2', 'TREC', 'MRPC']
+    elif args.task_set == 'full':
+        args.tasks = ['STS12', 'STS13', 'STS14', 'STS15', 'STS16', 'STSBenchmark', 'SICKRelatedness']
+        args.tasks += ['MR', 'CR', 'MPQA', 'SUBJ', 'SST2', 'TREC', 'MRPC']
 
     # Set params for SentEval
     if args.mode == 'dev' or args.mode == 'fasttest':
@@ -213,38 +225,60 @@ def main():
         
         # Get raw embeddings
         with torch.no_grad():
-                if args.embedding_only:
-                    hidden_states = None
-                    pooler_output = None
-                    last_hidden = model.embeddings.word_embeddings(batch['input_ids'])
-                    position_ids = model.embeddings.position_ids[:, 0 : last_hidden.shape[1]]
-                    token_type_ids = torch.zeros(batch['input_ids'].shape, dtype=torch.long,
-                                                    device=model.embeddings.position_ids.device)
+            if args.embedding_only:
+                hidden_states = None
+                pooler_output = None
+                last_hidden = model.embeddings.word_embeddings(batch['input_ids'])
+                position_ids = model.embeddings.position_ids[:, 0 : last_hidden.shape[1]]
+                token_type_ids = torch.zeros(batch['input_ids'].shape, dtype=torch.long,
+                                                device=model.embeddings.position_ids.device)
 
-                    position_embeddings = model.embeddings.position_embeddings(position_ids)
-                    token_type_embeddings = model.embeddings.token_type_embeddings(token_type_ids)
+                position_embeddings = model.embeddings.position_embeddings(position_ids)
+                token_type_embeddings = model.embeddings.token_type_embeddings(token_type_ids)
 
-                    if args.remove_continue_word:
-                        batch['attention_mask'][batch['input_ids'] == tokenizer.cls_token_id] = 0
-                        batch['attention_mask'][batch['input_ids'] == tokenizer.sep_token_id] = 0
-                elif args.mask_embedding_sentence_autoprompt:
-                    input_ids = batch['input_ids']
-                    inputs_embeds = model.embeddings.word_embeddings(input_ids)
-                    p = torch.arange(input_ids.shape[1]).to(input_ids.device).view(1, -1)
-                    b = torch.arange(input_ids.shape[0]).to(input_ids.device)
-                    for i, k in enumerate(dict_mbv):
-                        if fl_mbv[i]:
-                            index = ((input_ids == k) * p).max(-1)[1]
-                        else:
-                            index = ((input_ids == k) * -p).min(-1)[1]
-                        inputs_embeds[b, index] = p_mbv[i]
-                    batch['input_ids'], batch['inputs_embeds'] = None, inputs_embeds
-                    outputs = model(**batch, output_hidden_states=True, return_dict=True)
-                    batch['input_ids'] = input_ids
+                if args.remove_continue_word:
+                    batch['attention_mask'][batch['input_ids'] == tokenizer.cls_token_id] = 0
+                    batch['attention_mask'][batch['input_ids'] == tokenizer.sep_token_id] = 0
+            elif args.mask_embedding_sentence_autoprompt:
+                input_ids = batch['input_ids']
+                inputs_embeds = model.embeddings.word_embeddings(input_ids)
+                p = torch.arange(input_ids.shape[1]).to(input_ids.device).view(1, -1)
+                b = torch.arange(input_ids.shape[0]).to(input_ids.device)
+                for i, k in enumerate(dict_mbv):
+                    if fl_mbv[i]:
+                        index = ((input_ids == k) * p).max(-1)[1]
+                    else:
+                        index = ((input_ids == k) * -p).min(-1)[1]
+                    inputs_embeds[b, index] = p_mbv[i]
+                batch['input_ids'], batch['inputs_embeds'] = None, inputs_embeds
+                outputs = model(**batch, output_hidden_states=True, return_dict=True)
+                batch['input_ids'] = input_ids
 
+                last_hidden = outputs.last_hidden_state
+                pooler_output = last_hidden[input_ids == tokenizer.mask_token_id]
+
+                if args.mask_embedding_sentence_org_mlp:
+                    pooler_output = mlp(pooler_output)
+                if args.mask_embedding_sentence_delta:
+                    blen = batch['attention_mask'].sum(-1) - template_len
+                    if args.mask_embedding_sentence_org_mlp:
+                        pooler_output -= mlp(delta[blen])
+                    else:
+                        pooler_output -= delta[blen]
+                if args.mask_embedding_sentence_use_pooler:
+                    pooler_output = model.pooler.dense(pooler_output)
+                    pooler_output = model.pooler.activation(pooler_output)
+
+            else:
+                outputs = model(**batch, output_hidden_states=True, return_dict=True)
+
+                try:
+                    pooler_output = outputs.pooler_output
+                except AttributeError:
+                    pooler_output = outputs['last_hidden_state'][:, 0, :]
+                if args.mask_embedding_sentence:
                     last_hidden = outputs.last_hidden_state
-                    pooler_output = last_hidden[input_ids == tokenizer.mask_token_id]
-
+                    pooler_output = last_hidden[batch['input_ids'] == tokenizer.mask_token_id]
                     if args.mask_embedding_sentence_org_mlp:
                         pooler_output = mlp(pooler_output)
                     if args.mask_embedding_sentence_delta:
@@ -253,36 +287,14 @@ def main():
                             pooler_output -= mlp(delta[blen])
                         else:
                             pooler_output -= delta[blen]
+                    if args.mask_embedding_sentence_use_org_pooler:
+                        pooler_output = mlp(pooler_output)
                     if args.mask_embedding_sentence_use_pooler:
                         pooler_output = model.pooler.dense(pooler_output)
                         pooler_output = model.pooler.activation(pooler_output)
-
                 else:
-                    outputs = model(**batch, output_hidden_states=True, return_dict=True)
-
-                    try:
-                        pooler_output = outputs.pooler_output
-                    except AttributeError:
-                        pooler_output = outputs['last_hidden_state'][:, 0, :]
-                    if args.mask_embedding_sentence:
-                        last_hidden = outputs.last_hidden_state
-                        pooler_output = last_hidden[batch['input_ids'] == tokenizer.mask_token_id]
-                        if args.mask_embedding_sentence_org_mlp:
-                            pooler_output = mlp(pooler_output)
-                        if args.mask_embedding_sentence_delta:
-                            blen = batch['attention_mask'].sum(-1) - template_len
-                            if args.mask_embedding_sentence_org_mlp:
-                                pooler_output -= mlp(delta[blen])
-                            else:
-                                pooler_output -= delta[blen]
-                        if args.mask_embedding_sentence_use_org_pooler:
-                            pooler_output = mlp(pooler_output)
-                        if args.mask_embedding_sentence_use_pooler:
-                            pooler_output = model.pooler.dense(pooler_output)
-                            pooler_output = model.pooler.activation(pooler_output)
-                    else:
-                        last_hidden = outputs.last_hidden_state
-                        hidden_states = outputs.hidden_states
+                    last_hidden = outputs.last_hidden_state
+                    hidden_states = outputs.hidden_states
 
 
         # Apply different pooler
@@ -359,6 +371,18 @@ def main():
                     scores.append("%.2f" % (results[task]['all']['spearman']['all'] * 100))
                 else:
                     scores.append("%.2f" % (results[task]['test']['spearman'].correlation * 100))
+            else:
+                scores.append("0.00")
+        task_names.append("Avg.")
+        scores.append("%.2f" % (sum([float(score) for score in scores]) / len(scores)))
+        print_table(task_names, scores)
+
+        task_names = []
+        scores = []
+        for task in ['MR', 'CR', 'SUBJ', 'MPQA', 'SST2', 'TREC', 'MRPC']:
+            task_names.append(task)
+            if task in results:
+                scores.append("%.2f" % (results[task]['acc']))
             else:
                 scores.append("0.00")
         task_names.append("Avg.")
