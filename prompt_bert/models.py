@@ -18,7 +18,6 @@ from transformers.file_utils import (
 )
 from transformers.modeling_outputs import SequenceClassifierOutput, BaseModelOutputWithPoolingAndCrossAttentions
 
-import wandb
 
 class MLPLayer(nn.Module):
     """
