@@ -10,6 +10,10 @@
 | sup-prompt-bert-base [Download](https://drive.google.com/file/d/1TtqYSNeMpzQI59tqu3BNWUbnrkWB4GVm/view?usp=sharing)      | 75.48 | 85.59 | 80.57 | 85.99 | 81.08 | 84.56 | 80.52  | 81.97 |
 | sup-prompt-roberta-base [Download](https://drive.google.com/file/d/123wpRkpQr3OrlRuM2ZzeId2Mc-uw3ozY/view?usp=sharing)   | 76.75 | 85.93 | 82.28 | 86.69 | 82.80 | 86.14 | 80.04  | 82.95 |
     
+To evaluate the above models, please run the following script, 
+```sh
+bash eval_only.sh [unsup-bert|unsup-roberta|sup-bert|sup-roberta]
+```
 ## Download Data
 
 ``` sh
