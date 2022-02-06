@@ -411,7 +411,7 @@ class OurTrainingArguments(TrainingArguments):
         default=True, metadata={"help": "Remove columns not required by the model when using an nlp.Dataset."}
     )
     greater_is_better: bool = field(
-        default=None, metadata={"help": "Whether the `metric_for_best_model` should be maximized or not."}
+        default=True, metadata={"help": "Whether the `metric_for_best_model` should be maximized or not."}
     )
     load_best_model_at_end: bool = field(
         default=False,
