@@ -22,6 +22,17 @@ PATH_TO_DATA = './SentEval/data'
 sys.path.insert(0, PATH_TO_SENTEVAL)
 import senteval
 
+def cal_avg_cosine(k, n=100000):
+    cos = torch.nn.CosineSimilarity(dim=-1)
+    s = torch.tensor(k[:100000]).cuda()
+    kk = []
+    pbar = tqdm.tqdm(total=n)
+    with torch.no_grad():
+        for i in range(n):
+            kk.append(cos(s[i:i+1], s).mean().item())
+            pbar.set_postfix({'cosine': sum(kk)/len(kk)})
+            pbar.update(1)
+    return sum(kk) /len(kk)
 
 def s_eval(args):
     se, task = args[0], args[1]
@@ -84,6 +95,7 @@ def main():
             choices=['sts', 'transfer', 'full', 'na'],
             default='sts',
             help="What set of tasks to evaluate on. If not 'na', this will override '--tasks'")
+    parser.add_argument('--calc_anisotropy', action='store_true')
 
     args = parser.parse_args()
 
@@ -325,6 +337,23 @@ def main():
             return pooled_result.cpu()
         else:
             raise NotImplementedError
+
+    if args.calc_anisotropy:
+        with open('./data/wiki1m_for_simcse.txt') as f:
+            lines = f.readlines()[:100000]
+        batch, embeds = [], []
+        print('Get Sentence Embeddings....')
+        for line in tqdm.tqdm(lines):
+            batch.append(line.replace('\n', '').lower().split()[:32])
+            if len(batch) >= 128:
+                embeds.append(batcher(None, batch).detach().numpy())
+                batch = []
+        embeds.append(batcher(None, batch).detach().numpy())
+        print('Calculate anisotropy....')
+        embeds = np.concatenate(embeds, axis=0)
+        cosine = cal_avg_cosine(embeds)
+        print('Avg. Cos:', cosine)
+        exit(0)
 
     results = {}
 

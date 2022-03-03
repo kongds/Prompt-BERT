@@ -5,37 +5,42 @@ GPU=0,1,2,3
 ES=125 # --eval_steps
 BMETRIC=stsb_spearman # --metric_for_best_model
 TRAIN_FILE=data/wiki1m_for_simcse.txt
+
 if [[ $EXP == *"eval"* ]]; then
       EXP=`echo $EXP | sed s/eval-//`
       EVAL_ONLY=true
+elif [[ $EXP == *"-static-embedding" ]]; then
+      CHECKPOINT=`echo $EXP | sed s/-static-embedding//`
+      EXP=static-embedding
+elif [[ $EXP == *"-static-embedding-remove-baises" ]]; then
+      CHECKPOINT=`echo $EXP | sed s/-static-embedding-remove-baises//`
+      EXP=static-embedding-remove-baises
 else
       EVAL_ONLY=false
  fi
+
+if [[ $EXP == "calc-anisotropy-"* ]]; then
+    EXP=`echo $EXP | sed s/calc-anisotropy-//`
+    EVAL_ONLY=true
+    CALC_ANISOTROPY=true
+else
+    CALC_ANISOTROPY=false
+fi
+
 args=() # flags for training
-eargs=() # flags fro evaluation
+eargs=() # flags for evaluation
 
 case "$EXP" in
-"roberta-base-embedding-only-remove-baises")
-#| STS12 | STS13 | STS14 | STS15 | STS16 | STSBenchmark | SICKRelatedness |  Avg. |
-#| 60.54 | 66.90 | 66.81 | 76.85 | 71.68 |    69.11     |      61.56      | 67.64 |
+"roberta-base" | "bert-base-uncased" | "bert-base-cased")
   EVAL_ONLY=true
-  CHECKPOINT=roberta-base
-  eargs=(--remove_continue_word\
-         --embedding_only)
+  CHECKPOINT=$EXP
     ;;
-"bert-base-cased-embedding-only-remove-baises")
-#| STS12 | STS13 | STS14 | STS15 | STS16 | STSBenchmark | SICKRelatedness |  Avg. |
-#| 57.86 | 68.51 | 66.43 | 75.67 | 68.99 |    64.51     |      60.39      | 66.05 |
+"static-embedding")
   EVAL_ONLY=true
-  CHECKPOINT=bert-base-cased
-  eargs=(--remove_continue_word\
-         --embedding_only)
+  eargs=(--embedding_only)
     ;;
-"bert-base-uncased-embedding-only-remove-baises")
-#| STS12 | STS13 | STS14 | STS15 | STS16 | STSBenchmark | SICKRelatedness |  Avg. |
-#| 53.09 | 66.48 | 65.09 | 69.80 | 67.85 |    61.60     |      57.80      | 63.10 |
+"static-embedding-remove-baises")
   EVAL_ONLY=true
-  CHECKPOINT=bert-base-uncased
   eargs=(--remove_continue_word\
          --embedding_only)
     ;;
@@ -194,8 +199,17 @@ json.dump(config, open(os.path.join(path, "config.json"), "w"), indent=2)
 EOF
 fi
 
-CUDA_VISIBLE_DEVICES=$GPU python evaluation.py \
+if [[ $CALC_ANISOTROPY == true ]]; then
+  CUDA_VISIBLE_DEVICES=$GPU python evaluation.py \
+      --model_name_or_path $CHECKPOINT \
+      --pooler avg\
+      --mode test\
+      --calc_anisotropy\
+      ${eargs[@]}
+else
+  CUDA_VISIBLE_DEVICES=$GPU python evaluation.py \
     --model_name_or_path   $CHECKPOINT \
     --pooler avg\
     --mode test\
     ${eargs[@]}
+fi

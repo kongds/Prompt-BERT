@@ -29,9 +29,9 @@ cd -
 ## Static token embedding with removing embedding biases
 robert-base, bert-base-cased and robert-base-uncased
 ```sh
-./run.sh roberta-base-embedding-only-remove-baises
-./run.sh bert-base-cased-embedding-only-remove-baises
-./run.sh bert-base-uncased-embedding-only-remove-baises
+./run.sh roberta-base-static-embedding-remove-baises
+./run.sh bert-base-cased-static-embedding-remove-baises
+./run.sh bert-base-uncased-static-embedding-remove-baises
 ```
 
 ## Non fine-tuned BERT with Prompt
@@ -46,7 +46,7 @@ bert-base-uncased with optiprompt
 ./run.sh bert-optiprompt
 ```
 
-## fine-tuned BERT with Prompt
+## Fine-tuned BERT with Prompt
 ### unsupervised
 
 ``` sh
@@ -66,6 +66,14 @@ SEED=0
 
 ``` sh
 ./run.sh sup-bert
+```
+
+## Calculation of anisotropy
+To calculate the sentence anisotropy
+
+```sh
+EXP=bert-base-uncased | bert-base-uncased-static-embedding | bert-base-uncased-static-embedding-remove-baises 
+./run.sh calc-anisotropy-${EXP}
 ```
 
 Our Code is based on SimCSE
