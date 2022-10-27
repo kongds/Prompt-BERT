@@ -7,10 +7,10 @@ We propose PromptBERT, a novel contrastive learning method for learning better s
 
 | Model                                                                                                                    | STS12      | STS13      | STS14      | STS15      | STS16      | STSb       | SICK-R     | Avg.       |
 |--------------------------------------------------------------------------------------------------------------------------|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|
-| [unsup PromptBERT](https://drive.google.com/file/d/1n9FULUIRBhmhvaSQPaOnsudb_CVZyBli/view?usp=sharing)   | 71.56±0.18 | 84.58±0.22 | 76.98±0.26 | 84.47±0.24 | 80.60±0.21 | 81.60±0.22 | 69.87±0.40 | 78.54±0.15 |
-| [unsup PromptRoBERTa](https://drive.google.com/file/d/16qQst04wAr_i59ZL-79CVXoivec4lZOZ/view?usp=sharing) | 73.94±0.90 | 84.74±0.36 | 77.28±0.41 | 84.99±0.25 | 81.74±0.29 | 81.88±0.37 | 69.50±0.57 | 79.15±0.25 |
-| [sup PromptBERT](https://drive.google.com/file/d/1TtqYSNeMpzQI59tqu3BNWUbnrkWB4GVm/view?usp=sharing)      | 75.48      | 85.59      | 80.57      | 85.99      | 81.08      | 84.56      | 80.52      | 81.97      |
-|  [sup PromptRoBERTa](https://drive.google.com/file/d/123wpRkpQr3OrlRuM2ZzeId2Mc-uw3ozY/view?usp=sharing)   | 76.75      | 85.93      | 82.28      | 86.69      | 82.80      | 86.14      | 80.04      | 82.95      |
+| [unsupervised PromptBERT](https://drive.google.com/file/d/1n9FULUIRBhmhvaSQPaOnsudb_CVZyBli/view?usp=sharing)   | 71.56±0.18 | 84.58±0.22 | 76.98±0.26 | 84.47±0.24 | 80.60±0.21 | 81.60±0.22 | 69.87±0.40 | 78.54±0.15 |
+| [unsupervised PromptRoBERTa](https://drive.google.com/file/d/16qQst04wAr_i59ZL-79CVXoivec4lZOZ/view?usp=sharing) | 73.94±0.90 | 84.74±0.36 | 77.28±0.41 | 84.99±0.25 | 81.74±0.29 | 81.88±0.37 | 69.50±0.57 | 79.15±0.25 |
+| [supervised PromptBERT](https://drive.google.com/file/d/1TtqYSNeMpzQI59tqu3BNWUbnrkWB4GVm/view?usp=sharing)      | 75.48      | 85.59      | 80.57      | 85.99      | 81.08      | 84.56      | 80.52      | 81.97      |
+| [supervised PromptRoBERTa](https://drive.google.com/file/d/123wpRkpQr3OrlRuM2ZzeId2Mc-uw3ozY/view?usp=sharing)   | 76.75      | 85.93      | 82.28      | 86.69      | 82.80      | 86.14      | 80.04      | 82.95      |
     
 To evaluate the above models, please run the following script, 
 ```sh
