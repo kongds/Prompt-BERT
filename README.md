@@ -3,12 +3,12 @@
     
 ## Results on STS Tasks
 
-| Model                                                                                                                    | STS12 | STS13 | STS14 | STS15 | STS16 | STSb  | SICK-R | Avg.  |
-|--------------------------------------------------------------------------------------------------------------------------|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:------:|:-----:|
-| unsup-prompt-bert-base  [Download](https://drive.google.com/file/d/1n9FULUIRBhmhvaSQPaOnsudb_CVZyBli/view?usp=sharing)   | 71.98 | 84.66 | 77.13 | 84.52 | 81.10 | 82.03 | 70.64  | 78.87 |
-| unsup-prompt-roberta-base [Download](https://drive.google.com/file/d/16qQst04wAr_i59ZL-79CVXoivec4lZOZ/view?usp=sharing) | 73.98 | 84.73 | 77.88 | 84.93 | 81.89 | 82.74 | 69.21  | 79.34 |
-| sup-prompt-bert-base [Download](https://drive.google.com/file/d/1TtqYSNeMpzQI59tqu3BNWUbnrkWB4GVm/view?usp=sharing)      | 75.48 | 85.59 | 80.57 | 85.99 | 81.08 | 84.56 | 80.52  | 81.97 |
-| sup-prompt-roberta-base [Download](https://drive.google.com/file/d/123wpRkpQr3OrlRuM2ZzeId2Mc-uw3ozY/view?usp=sharing)   | 76.75 | 85.93 | 82.28 | 86.69 | 82.80 | 86.14 | 80.04  | 82.95 |
+| Model                                                                                                                    | STS12      | STS13      | STS14      | STS15      | STS16      | STSb       | SICK-R     | Avg.       |
+|--------------------------------------------------------------------------------------------------------------------------|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|:----------:|
+| unsup-prompt-bert-base  [Download](https://drive.google.com/file/d/1n9FULUIRBhmhvaSQPaOnsudb_CVZyBli/view?usp=sharing)   | 71.56±0.18 | 84.58±0.22 | 76.98±0.26 | 84.47±0.24 | 80.60±0.21 | 81.60±0.22 | 69.87±0.40 | 78.54±0.15 |
+| unsup-prompt-roberta-base [Download](https://drive.google.com/file/d/16qQst04wAr_i59ZL-79CVXoivec4lZOZ/view?usp=sharing) | 73.94±0.90 | 84.74±0.36 | 77.28±0.41 | 84.99±0.25 | 81.74±0.29 | 81.88±0.37 | 69.50±0.57 | 79.15±0.25 |
+| sup-prompt-bert-base [Download](https://drive.google.com/file/d/1TtqYSNeMpzQI59tqu3BNWUbnrkWB4GVm/view?usp=sharing)      | 75.48      | 85.59      | 80.57      | 85.99      | 81.08      | 84.56      | 80.52      | 81.97      |
+| sup-prompt-roberta-base [Download](https://drive.google.com/file/d/123wpRkpQr3OrlRuM2ZzeId2Mc-uw3ozY/view?usp=sharing)   | 76.75      | 85.93      | 82.28      | 86.69      | 82.80      | 86.14      | 80.04      | 82.95      |
     
 To evaluate the above models, please run the following script, 
 ```sh
