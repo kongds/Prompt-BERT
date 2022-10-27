@@ -87,5 +87,5 @@ EXP=bert-base-uncased | bert-base-uncased-static-embedding | bert-base-uncased-s
 ./run.sh calc-anisotropy-${EXP}
 ```
 
-# Acknowledgement
+## Acknowledgement
 Our Code is based on SimCSE
