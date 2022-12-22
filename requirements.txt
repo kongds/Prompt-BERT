@@ -7,3 +7,4 @@ prettytable==2.1.0
 gradio
 torch
 setuptools==49.3.0
+dill==0.3.4
