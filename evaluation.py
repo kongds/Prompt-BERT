@@ -56,7 +56,8 @@ def get_delta(model, template, tokenizer, device, args):
     batch = tokenizer([template.replace('_', ' ').strip().replace('   ', ' ')], return_tensors='pt')
     batch['position_ids'] = torch.arange(batch['input_ids'].shape[1]).to(device).unsqueeze(0)
     for k in batch:
-        batch[k] = batch[k].repeat(128, 1).to(device)
+        batch[k] = batch[k].repeat(256, 1).to(device)
+    batch['position_ids'][:, bs_length:] += torch.arange(256).to(device).unsqueeze(-1)
     m_mask = batch['input_ids'] == tokenizer.mask_token_id
 
     with torch.no_grad():
