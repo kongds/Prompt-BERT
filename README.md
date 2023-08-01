@@ -1,5 +1,7 @@
 # PromptBERT: Prompt makes BERT Better at Sentence Embeddings
 
+Updates: We have extended our prompt-based method on LLMs in [scaling_sentemb](https://github.com/kongds/scaling_sentemb). [2023/08/01]
+
 ## Overview
 We propose PromptBERT, a novel contrastive learning method for learning better sentence representation. We firstly analyze the drawback of current sentence embedding from original BERT and find that it is mainly due to the static token embedding bias and ineffective BERT layers. Then we propose the first prompt-based sentence embeddings method and discuss two prompt representing methods and three prompt searching methods to make BERT achieve better sentence embeddings. Moreover, we propose a novel unsupervised training objective by the technology of template denoising, which substantially shortens the performance gap between the supervised and unsupervised settings. Extensive experiments show the effectiveness of our method. Compared to SimCSE, PromptBert achieves 2.29 and 2.58 points of improvement based on BERT and RoBERTa in the unsupervised setting.
     
